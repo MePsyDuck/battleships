@@ -1,0 +1,5 @@
+"C:\Program Files\JetBrains\CLion 2017.3.3\bin\cmake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" C:\Users\pc\Documents\GitHub\battleships
+-- Found SFML 2.4.2 in E:/Program Files/SFML-2.4.2/include
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/pc/Documents/GitHub/battleships/cmake-build-debug

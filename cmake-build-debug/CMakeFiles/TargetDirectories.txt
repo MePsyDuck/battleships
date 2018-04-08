@@ -1,0 +1,3 @@
+C:/Users/pc/Documents/GitHub/battleships/cmake-build-debug/CMakeFiles/battleships.dir
+C:/Users/pc/Documents/GitHub/battleships/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/pc/Documents/GitHub/battleships/cmake-build-debug/CMakeFiles/rebuild_cache.dir
