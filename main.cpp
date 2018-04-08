@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 #define SIZE 6
+
 using namespace std;
 
 class Point {
@@ -34,18 +36,21 @@ public:
 };
 
 class Board{
-    // 0 = empty
+    // 0 = open/unknown
     // 1 = ship
-    //-1 = cell used/invalid
+    //-1 = cell empty/invalid
     vector< vector<int> > pos;
+
+    void init() {
+        pos = vector<vector<int> >(SIZE, vector<int>(SIZE, 0));
+    }
 public:
     Board(){
-        for(int i=0;i<6;i++)
-            pos.at(i) = vector<int>(SIZE, 0);
+        init();
     }
 
     Board(vector<pair<Point, Point> > ships) {
-        Board();
+        init();
         for (auto ship : ships)
             addship(ship);
     }
@@ -92,26 +97,61 @@ public:
     }
 };
 
-int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 400), "Battleships");
+class SpriteManager {
+public:
     sf::Texture water;
-    water.loadFromFile("texture/water.jpg");
-    sf::Sprite opensea(water), emptysea(water), ship(water);
-    opensea.setTextureRect(sf::IntRect(0, 0, 60, 60));
-    emptysea.setTextureRect(sf::IntRect(0, 0, 60, 60));
-    ship.setTextureRect(sf::IntRect(0, 0, 60, 60));
-    emptysea.setColor(sf::Color(255, 255, 255, 50));
-    ship.setColor(sf::Color(255, 255, 255));
+    sf::Sprite open, empty, ship;
 
+    SpriteManager() {
+        water.loadFromFile("texture/water.jpg");
+        open = sf::Sprite(water);
+        empty = sf::Sprite(water);
+        open = sf::Sprite(water);
+        open.setTextureRect(sf::IntRect(0, 0, 60, 60));
+        empty.setTextureRect(sf::IntRect(0, 0, 60, 60));
+        ship.setTextureRect(sf::IntRect(0, 0, 60, 60));
+        empty.setColor(sf::Color(255, 255, 255, 50));
+        ship.setColor(sf::Color(255, 255, 255));
+    }
+
+    sf::Sprite getsprite(int type) {
+        if (type == 0) return open;
+        if (type == -1) return empty;
+        else return ship;
+    }
+};
+
+int main() {
+    Board board1, board2;
+    sf::RenderWindow window(sf::VideoMode(800, 400), "Battleships");
+    SpriteManager sprites;
+    sf::Sprite tile;
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-
         window.clear(sf::Color::Black);
-        window.draw(ship);
+
+        //draw board 1
+        for (int i = 0; i < SIZE; i++) {
+            int xoffset = 20, yoffset = 20;
+            for (int j = 0; j < SIZE; j++) {
+                tile = sprites.getsprite(board1.getpos(i, j));
+                tile.setPosition(sf::Vector2f(xoffset + i * 60, yoffset + j * 60));
+                window.draw(tile);
+            }
+        }
+        //draw board 2
+        for (int i = 0; i < SIZE; i++) {
+            int xoffset = 420, yoffset = 20;
+            for (int j = 0; j < SIZE; j++) {
+                tile = sprites.getsprite(board2.getpos(i, j));
+                tile.setPosition(sf::Vector2f(xoffset + i * 60, yoffset + j * 60));
+                window.draw(tile);
+            }
+        }
         window.display();
     }
     return 0;
