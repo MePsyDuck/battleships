@@ -92,32 +92,27 @@ public:
     }
 };
 
-int main()
-{
-    // create the window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
+int main() {
+    sf::RenderWindow window(sf::VideoMode(800, 400), "Battleships");
+    sf::Texture water;
+    water.loadFromFile("texture/water.jpg");
+    sf::Sprite opensea(water), emptysea(water), ship(water);
+    opensea.setTextureRect(sf::IntRect(0, 0, 60, 60));
+    emptysea.setTextureRect(sf::IntRect(0, 0, 60, 60));
+    ship.setTextureRect(sf::IntRect(0, 0, 60, 60));
+    emptysea.setColor(sf::Color(255, 255, 255, 50));
+    ship.setColor(sf::Color(255, 255, 255));
 
-    // run the program as long as the window is open
-    while (window.isOpen())
-    {
-        // check all the window's events that were triggered since the last iteration of the loop
+    while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event))
-        {
-            // "close requested" event: we close the window
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
 
-        // clear the window with black color
         window.clear(sf::Color::Black);
-
-        // draw everything here...
-        // window.draw(...);
-
-        // end the current frame
+        window.draw(ship);
         window.display();
     }
-
     return 0;
 }
