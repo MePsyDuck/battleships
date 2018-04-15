@@ -11,6 +11,10 @@ C:/Users/pc/Documents/GitHub/battleships/bot.cpp
 C:/Users/pc/Documents/GitHub/battleships/main.cpp
 SFML/Graphics.hpp
 -
+random
+-
+iostream
+-
 
 E:/Program Files/SFML-2.4.2/include/SFML/Config.hpp
 TargetConditionals.h

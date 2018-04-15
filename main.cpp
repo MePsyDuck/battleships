@@ -46,20 +46,11 @@ public:
 
 class Board {
     std::vector<std::vector<int> > pos;
+    std::vector<std::vector<bool> > mask;
 
     void init() {
         pos = std::vector<std::vector<int> >(BOARDSIZE, std::vector<int>(BOARDSIZE, EMPTY));
-    }
-
-public:
-    Board() {
-        init();
-    }
-
-    Board(std::vector<std::pair<Point, Point> > ships) {
-        init();
-        for (auto ship : ships)
-            addShip(ship);
+        mask = std::vector<std::vector<bool> >(BOARDSIZE, std::vector<bool>(BOARDSIZE, true));
     }
 
     void addShip(std::pair<Point, Point> ship) {
@@ -88,22 +79,20 @@ public:
         return true;
     }
 
+public:
+    Board() {
+        init();
+    }
+
+    explicit Board(std::vector<std::pair<Point, Point> > ships) {
+        init();
+        for (auto ship : ships)
+            addShip(ship);
+    }
+
     int getPos(int x, int y) {
         if (x >= BOARDSIZE || y >= BOARDSIZE || x < 0 || y < 0) return INVALID;
         return pos.at(x).at(y);
-    }
-
-    void setPos(int x, int y, int s) {
-        pos.at(x).at(y) = s;
-    }
-
-    bool isPosFree(int x, int y) {
-        if (x >= BOARDSIZE || y >= BOARDSIZE || x < 0 || x < 0) return false;
-        return getPos(x, y) == EMPTY;
-    }
-
-    bool isPosNotFree(int x, int y) {
-        return !isPosFree(x, y);
     }
 
     int getPos(Point p) {
@@ -111,8 +100,17 @@ public:
         return pos.at(p.getx()).at(p.gety());
     }
 
+    void setPos(int x, int y, int state) {
+        pos.at(x).at(y) = state;
+    }
+
     void setPos(Point p, int state) {
         pos.at(p.getx()).at(p.gety()) = state;
+    }
+
+    bool isPosFree(int x, int y) {
+        if (x >= BOARDSIZE || y >= BOARDSIZE || x < 0 || x < 0) return false;
+        return getPos(x, y) == EMPTY;
     }
 
     bool isPosFree(Point p) {
@@ -120,8 +118,38 @@ public:
         return getPos(p) == EMPTY;
     }
 
+    bool isPosNotFree(int x, int y) {
+        return !isPosFree(x, y);
+    }
+
     bool isPosNotFree(Point p) {
         return !isPosFree(p);
+    }
+
+    bool isHidden(Point p) {
+        return mask.at(p.getx()).at(p.gety());
+    }
+
+    bool isHidden(int x, int y) {
+        return mask.at(x).at(y);
+    }
+
+    int getType(int x, int y) {
+        if (isHidden(x, y)) return HIDDEN;
+        else return getPos(x, y);
+    }
+
+    int getType(Point p) {
+        if (isHidden(p)) return HIDDEN;
+        else return getPos(p);
+    }
+
+    void setVisible(int x, int y) {
+        mask.at(x).at(y) = false;
+    }
+
+    void setVisible(Point p) {
+        mask.at(p.getx()).at(p.gety()) = false;
     }
 
     void addRandomShips(std::vector<int> shipSizes) {
@@ -191,41 +219,49 @@ public:
 int main() {
     Board board = Board();
     board.addRandomShips({2, 3, 4, 5});
-    sf::RenderWindow window(sf::VideoMode(BOARDSIZE * TILESIZE + 2 * OFFSET, BOARDSIZE * TILESIZE + 2 * OFFSET),
-                            "Battleships");
+    sf::RenderWindow app(sf::VideoMode(BOARDSIZE * TILESIZE + 2 * OFFSET, BOARDSIZE * TILESIZE + 2 * OFFSET),
+                         "Battleships");
     SpriteManager sprites = SpriteManager();
     sf::Sprite tile;
-    while (window.isOpen()) {
+    while (app.isOpen()) {
         sf::Event event; // NOLINT
-        while (window.pollEvent(event)) {
+        while (app.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
-                window.close();
+                app.close();
+            if (event.type == sf::Event::MouseButtonPressed)
+                if (event.mouseButton.button == sf::Mouse::Left)
+                    if (event.mouseButton.x >= OFFSET && event.mouseButton.x <= (OFFSET + BOARDSIZE * TILESIZE))
+                        if (event.mouseButton.y >= OFFSET && event.mouseButton.y <= (OFFSET + BOARDSIZE * TILESIZE)) {
+                            int xpos = (event.mouseButton.x - OFFSET) / TILESIZE;
+                            int ypos = (event.mouseButton.y - OFFSET) / TILESIZE;
+                            board.setVisible(xpos, ypos);
+                        }
         }
-        window.clear(sf::Color::Black);
+        app.clear(sf::Color::Black);
 
         //draw tiles
         for (int i = 0; i < BOARDSIZE; i++) {
             for (int j = 0; j < BOARDSIZE; j++) {
-                tile = sprites.getSprite(board.getPos(i, j));
+                tile = sprites.getSprite(board.getType(i, j));
                 tile.setPosition(sf::Vector2f(OFFSET + i * TILESIZE, OFFSET + j * TILESIZE));
-                window.draw(tile);
+                app.draw(tile);
             }
         }
         //draw borders
-        sf::Vertex line[2];
+        std::array<sf::Vertex, 2> line;
         for (int i = 0; i <= BOARDSIZE; i++) {
             line[0] = sf::Vertex(sf::Vector2f(OFFSET + i * TILESIZE, OFFSET));
             line[1] = sf::Vertex(sf::Vector2f(OFFSET + i * TILESIZE, BOARDSIZE * TILESIZE + OFFSET));
-            window.draw(line, 2, sf::Lines);
+            app.draw(line.begin(), 2, sf::Lines);
         }
 
         for (int i = 0; i <= BOARDSIZE; i++) {
             line[0] = sf::Vertex(sf::Vector2f(OFFSET, OFFSET + i * TILESIZE));
             line[1] = sf::Vertex(sf::Vector2f(BOARDSIZE * TILESIZE + OFFSET, OFFSET + i * TILESIZE));
-            window.draw(line, 2, sf::Lines);
+            app.draw(line.begin(), 2, sf::Lines);
         }
 
-        window.display();
+        app.display();
     }
     return 0;
 }
