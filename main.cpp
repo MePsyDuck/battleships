@@ -4,7 +4,8 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
-#define BOARDSIZE 8
+
+#define BOARDSIZE 6
 #define OFFSET 40
 #define TILESIZE 80
 
@@ -124,15 +125,14 @@ public:
     }
 
     void addRandomShips(std::vector<int> shipSizes) {
-        std::random_device rd;
-        std::mt19937 gen{rd()};
+        std::mt19937 gen{static_cast<unsigned int>(time(nullptr))};
         std::uniform_int_distribution<int> dis{0, BOARDSIZE - 1};
         for (auto size : shipSizes) {
             bool shipAdded = false;
             while (!shipAdded) {
                 Point start(dis(gen), dis(gen));
                 if (isPosFree(start)) {
-                    std::vector<Point> directions = {
+                    std::array<Point, 4> directions = {
                             Point(start.getx(), start.gety() - size + 1),  //north
                             Point(start.getx(), start.gety() + size - 1),  //south
                             Point(start.getx() - size + 1, start.gety()),  //west
