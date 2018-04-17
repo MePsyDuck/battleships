@@ -47,13 +47,16 @@ public:
 class Board {
     std::vector<std::vector<int> > pos;
     std::vector<std::vector<bool> > mask;
+    int shipCount{};
 
     void init() {
         pos = std::vector<std::vector<int> >(BOARDSIZE, std::vector<int>(BOARDSIZE, EMPTY));
         mask = std::vector<std::vector<bool> >(BOARDSIZE, std::vector<bool>(BOARDSIZE, true));
+        shipCount = 0;
     }
 
     void addShip(std::pair<Point, Point> ship) {
+        shipCount += (abs(ship.first.gety() - ship.second.gety()) + abs(ship.first.getx() - ship.second.getx()) + 1);
         if (ship.first.getx() == ship.second.getx())
             for (int y = std::min(ship.first.gety(), ship.second.gety());
                  y <= std::max(ship.first.gety(), ship.second.gety()); y++)
@@ -144,12 +147,18 @@ public:
         else return getPos(p);
     }
 
+    bool shipsLeft() {
+        return shipCount > 0;
+    }
+
     void setVisible(int x, int y) {
         mask.at(x).at(y) = false;
+        if (getType(x, y) == SHIP) shipCount--;
     }
 
     void setVisible(Point p) {
         mask.at(p.getx()).at(p.gety()) = false;
+        if (getType(p) == SHIP) shipCount--;
     }
 
     void addRandomShips(std::vector<int> shipSizes) {
@@ -157,6 +166,7 @@ public:
         std::uniform_int_distribution<int> dis{0, BOARDSIZE - 1};
         for (auto size : shipSizes) {
             bool shipAdded = false;
+
             while (!shipAdded) {
                 Point start(dis(gen), dis(gen));
                 if (isPosFree(start)) {
@@ -168,11 +178,7 @@ public:
                     };
                     std::shuffle(directions.begin(), directions.end(), gen);
                     for (auto end : directions) {
-                        if (checkSafe(std::make_pair(start, end))) {
-                            std::cout << "Adding ship of size " << size << " start at(" << start.getx() << ","
-                                      << start.gety() << ") and end at (" << end.getx() << "," << end.gety()
-                                      << ")"
-                                      << std::endl;
+                        if (checkSafe(std::make_pair(start, end))) { ;
                             addShip(std::make_pair(start, end));
                             shipAdded = true;
                             break;
@@ -218,6 +224,7 @@ public:
 
 int main() {
     Board board = Board();
+    int moves = 0;
     board.addRandomShips({2, 3, 4, 5});
     sf::RenderWindow app(sf::VideoMode(BOARDSIZE * TILESIZE + 2 * OFFSET, BOARDSIZE * TILESIZE + 2 * OFFSET),
                          "Battleships");
@@ -235,6 +242,9 @@ int main() {
                             int xpos = (event.mouseButton.x - OFFSET) / TILESIZE;
                             int ypos = (event.mouseButton.y - OFFSET) / TILESIZE;
                             board.setVisible(xpos, ypos);
+                            moves++;
+                            if (!board.shipsLeft())
+                                std::cout << "You win in " << moves << " moves" << std::endl;
                         }
         }
         app.clear(sf::Color::Black);
