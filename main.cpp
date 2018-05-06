@@ -333,9 +333,9 @@ int main() {
                                                    std::make_pair(Point(4, 6), Point(6, 6)),
                                                    std::make_pair(Point(6, 3), Point(6, 1)),
                                                    std::make_pair(Point(3, 1), Point(1, 1))};
-    Board board = Board(ships);
+    Board board = Board();
     int moves = 0;
-    //board.addRandomShips({2, 3, 4, 5});
+    board.addRandomShips({2, 3, 4, 5});
     sf::RenderWindow app(sf::VideoMode(BOARDSIZE * TILESIZE + 2 * OFFSET, BOARDSIZE * TILESIZE + 2 * OFFSET),
                          "Battleships");
     sf::Sprite tile;
